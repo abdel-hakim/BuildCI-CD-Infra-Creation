@@ -10,8 +10,8 @@ jobs:
           name: Ensure backend infrastructure exist
           command: |
             aws cloudformation deploy \
-              --template-file template.yml \
-              --stack-name my-staack
+                --template-file template.yml \
+                --stack-name my-staaaasck
 workflows:
   my_workflow:
     jobs:
