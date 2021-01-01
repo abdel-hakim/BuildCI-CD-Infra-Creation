@@ -1,90 +1,90 @@
 Resources:
-    VPC: 
-      Type: AWS::EC2::VPC
-      Properties:
-          CidrBlock: 10.0.0.0/16
-          EnableDnsHostnames: true
-          InstanceTenancy: default
-          Tags: 
-            - Key: Name 
-              Value: uda
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: uda
 
-###### Create Internet Gateway & Attachment #####
-    InternetGateway:
-      Type: AWS::EC2::InternetGateway
-      Properties:
-          Tags:
-              - Key: Name
-                Value: uda
-    InternetGatewayAttachment:
-      Type: AWS::EC2::VPCGatewayAttachment
-      Properties:
-          InternetGatewayId: !Ref InternetGateway
-          VpcId: !Ref VPC
+  ###### Create Internet Gateway & Attachment #####
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: uda
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
 
-###### Create PublicSubnets #####################
-    PublicSubnet1: 
-        Type: AWS::EC2::Subnet
-        Properties:
-            VpcId: !Ref VPC
-            AvailabilityZone: !Select [ 0, !GetAZs '' ]
-            CidrBlock: 10.0.0.0/24
-            MapPublicIpOnLaunch: true
-    NatGateway1EIP:
-      Type: AWS::EC2::EIP
-      DependsOn: InternetGatewayAttachment
-      Properties: 
-          Domain: vpc
-    NatGateway1: 
-      Type: AWS::EC2::NatGateway
-      Properties: 
-          AllocationId: !GetAtt NatGateway1EIP.AllocationId
-          SubnetId: !Ref PublicSubnet1
+  ###### Create PublicSubnets #####################
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: 10.0.0.0/24
+      MapPublicIpOnLaunch: true
+  NatGateway1EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway1EIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
 
-# after creation must make rules for connectivity
-#------------------------------------------------
-# we need 3 steps to make the rule:
-#1- Create table name for and connecting with "VPC"
+  # after creation must make rules for connectivity
+  #------------------------------------------------
+  # we need 3 steps to make the rule:
+  #1- Create table name for and connecting with "VPC"
 
-    PublicRouteTable:
-      Type: AWS::EC2::RouteTable
-      Properties: 
-          VpcId: !Ref VPC
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
 
-#2- define the rule
+  #2- define the rule
 
-    DefaultPublicRoute: 
-      Type: AWS::EC2::Route
-      DependsOn: InternetGatewayAttachment
-      Properties: 
-          RouteTableId: !Ref PublicRouteTable
-          DestinationCidrBlock: 0.0.0.0/0
-          GatewayId: !Ref InternetGateway
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
 
-#3- define which Subnet will have that rule Example:("PublicSubnet1" or "PublicSubnet2" .. )
+  #3- define which Subnet will have that rule Example:("PublicSubnet1" or "PublicSubnet2" .. )
 
-    PublicSubnet1RouteTableAssociation:
-      Type: AWS::EC2::SubnetRouteTableAssociation
-      Properties:
-          RouteTableId: !Ref PublicRouteTable
-          SubnetId: !Ref PublicSubnet1
-  
-    Ec2Instance:
-      Type: 'AWS::EC2::Instance'
-      Properties:
-        SecurityGroups:
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+  Ec2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      SecurityGroups:
         - !Ref InstanceSecurityGroup
-        InstanceType: t2.micro
-        KeyName: ans
-        SubnetId: !Ref PublicSubnet1
-        ImageId: 'ami-068663a3c619dd892' # you may need to find out what instance types are available in your region - use https://cloud-images.ubuntu.com/locator/ec2/
+      InstanceType: t2.micro
+      KeyName: ans
+      SubnetId: !Ref PublicSubnet1
+      ImageId: "ami-068663a3c619dd892" # you may need to find out what instance types are available in your region - use https://cloud-images.ubuntu.com/locator/ec2/
 
-    InstanceSecurityGroup:
-      Type: 'AWS::EC2::SecurityGroup'
-      Properties:
-        GroupDescription: Enable SSH access via port 22
-        SecurityGroupIngress:
+  InstanceSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: '22'
-          ToPort: '22'
+          FromPort: "22"
+          ToPort: "22"
           CidrIp: 0.0.0.0/0
