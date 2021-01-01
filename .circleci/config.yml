@@ -11,8 +11,7 @@ jobs:
           command: |
             aws cloudformation deploy \
                 --template-file template.yml \
-                --parameters vpc.json \
-                --stack-name my-staaaasck
+                --stack-name my-stddddsck
 workflows:
   my_workflow:
     jobs:

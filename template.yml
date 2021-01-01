@@ -17,11 +17,12 @@ Resources:
     VPC: 
       Type: AWS::EC2::VPC
       Properties:
-          CidrBlock: !Ref VpcCIDR
+          CidrBlock: 10.0.0.0/16
           EnableDnsHostnames: true
+          InstanceTenancy: default
           Tags: 
             - Key: Name 
-              Value: !Ref EnvironmentName
+              Value: uda
 
 ###### Create Internet Gateway & Attachment #####
     InternetGateway:
@@ -29,7 +30,7 @@ Resources:
       Properties:
           Tags:
               - Key: Name
-                Value: !Ref EnvironmentName
+                Value: uda
     InternetGatewayAttachment:
       Type: AWS::EC2::VPCGatewayAttachment
       Properties:
@@ -42,11 +43,8 @@ Resources:
         Properties:
             VpcId: !Ref VPC
             AvailabilityZone: !Select [ 0, !GetAZs '' ]
-            CidrBlock: !Ref PublicSubnet1CIDR
+            CidrBlock: 10.0.0.0/24
             MapPublicIpOnLaunch: true
-            Tags: 
-              - Key: Name 
-                Value: !Sub ${EnvironmentName} Public Subnet (AZ1)
     NatGateway1EIP:
       Type: AWS::EC2::EIP
       DependsOn: InternetGatewayAttachment
@@ -67,9 +65,6 @@ Resources:
       Type: AWS::EC2::RouteTable
       Properties: 
           VpcId: !Ref VPC
-          Tags: 
-              - Key: Name 
-                Value: !Sub ${EnvironmentName} Public Routes
 
 #2- define the rule
 
@@ -108,17 +103,3 @@ Resources:
           FromPort: '22'
           ToPort: '22'
           CidrIp: 0.0.0.0/0
-
-Outputs: 
-
-    VPC: 
-        Description: A reference to the created VPC
-        Value: !Ref VPC
-        Export:
-          Name: !Sub ${EnvironmentName}-VPCID
-
-    VPCPublicRouteTable:
-        Description: Public Routing
-        Value: !Ref PublicRouteTable
-        Export:
-          Name: !Sub ${EnvironmentName}-PUB-RT
