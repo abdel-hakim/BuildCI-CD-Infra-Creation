@@ -14,9 +14,9 @@ jobs:
             aws cloudformation deploy \
               --template-file template.yml \
               --stack-name hakimmm
-      - run:
-          command:  |
-            aws cloudformation describe-stack-events --stack-name hakimm
+      # - run:
+      #     command:  |
+      #       aws cloudformation describe-stack-events --stack-name hakimm
 workflows:
   my_workflow:
     jobs:
