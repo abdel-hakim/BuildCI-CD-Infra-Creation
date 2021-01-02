@@ -6,15 +6,14 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      # - run:
-      #     command:  |
-      #       aws ec2 create-default-vpc
       - run:
           name: Ensure backend infrastructure exist
           command: |
+            pwd
+            ls -la
             aws cloudformation deploy \
-                --template-file /.circleci/template.yml \
-                --stack-name stack
+              --template-file template.yml \
+              --stack-name stack
 workflows:
   my_workflow:
     jobs:
