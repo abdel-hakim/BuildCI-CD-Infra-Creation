@@ -5,10 +5,10 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
-      - checkout
-      - run:
-          command:  |
-            aws ec2 create-default-vpc
+      # - checkout
+      # - run:
+      #     command:  |
+      #       aws ec2 create-default-vpc
       - run:
           name: Ensure backend infrastructure exist
           command: |
